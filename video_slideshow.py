@@ -9,12 +9,12 @@ from moviepy.video.fx.Resize import Resize
 from moviepy.video.fx.Loop import Loop
 
 # === НАСТРОЙКИ ===
-video_folder = r"H:\_Daytona\Нова папка"        # 📁 Папка с видеата
-logo_path = r"C:\Users\tutra\Desktop\D6.png"     # 🖼️ Път към PNG логото
-transition_duration = 1.5                        # ⏳ Продължителност на преходите (секунди)
-logo_position = 'top-right'                      # 📌 Позиция: top-left, top-right, bottom-left, bottom-right
-logo_scale = 0.15                                # 🔍 Размер на логото спрямо ширината
-target_resolution = (1920, 1080)                 # 🖥️ Изходна резолюция
+video_folder = r"H:\SOME FOLDER"        # 📁 The folder with video files
+logo_path = r"C:\SOME FOLDER\D6.png"     # 🖼️ Path to your LOGO.png
+transition_duration = 1.5                        # ⏳ Duration of the transition (in seconds)
+logo_position = 'top-right'                      # 📌 Positions: top-left, top-right, bottom-left, bottom-right
+logo_scale = 0.15                                # 🔍 Logo dimension
+target_resolution = (1920, 1080)                 # 🖥️ Output resolution
 
 # === ПОЗИЦИЯ НА ЛОГОТО ===
 def get_logo_position(clip, logo_clip, position):
@@ -30,12 +30,12 @@ def get_logo_position(clip, logo_clip, position):
     else:
         return ('center', 'center')
 
-# === ПРОВЕРКА НА ПАПКАТА ===
+# === FOLDER CHECK ===
 if not os.path.exists(video_folder):
     print(f"❌ Папката не съществува: {video_folder}")
     exit()
 
-# === ЗАРЕЖДАНЕ НА ВИДЕО ФАЙЛОВЕТЕ ===
+# === LOADING OF VIDEO FILES ===
 video_files = [
     os.path.join(video_folder, f)
     for f in os.listdir(video_folder)
@@ -48,10 +48,10 @@ if not video_files:
 
 random.shuffle(video_files)  # 🎲 Случаен ред
 
-# === ЛОГО ===
+# === LOGO ===
 logo = ImageClip(logo_path)
 
-# === ГЕНЕРИРАНЕ НА КЛИПОВЕТЕ ===
+# === VIDEO GENERATING ===
 final_clips = []
 start_time = 0
 
@@ -61,29 +61,30 @@ for video_path in video_files:
     # 📏 Скалиране до 1920x1080
     clip = Resize(new_size=target_resolution).apply(clip)
 
-    # ⬇️ Преходи
+    # ⬇️ Transitions
     clip = FadeIn(duration=transition_duration).apply(clip)
     clip = FadeOut(duration=transition_duration).apply(clip)
 
-    # 🖼️ Добавяне на логото
+    # 🖼️ Logo add
     logo_resized = Resize(width=clip.w * logo_scale).apply(logo)
     logo_pos = get_logo_position(clip, logo_resized, logo_position)
     logo_clip = logo_resized.with_position(logo_pos).with_duration(clip.duration)
 
-    # 🎬 Обединяване на видео + лого
+    # 🎬 Joining video + logo
     composed = CompositeVideoClip([clip, logo_clip], size=target_resolution).with_duration(clip.duration)
 
-    # 🕒 Добавяне на стартово време
+    # 🕒 Adding start time
     composed = composed.with_start(start_time)
     start_time += clip.duration
 
     final_clips.append(composed)
 
-# === ОБЕДИНЯВАНЕ НА ВСИЧКИ КЛИПОВЕ ===
+# === Joining all videos ===
 full_slideshow = CompositeVideoClip(final_clips, size=target_resolution).with_duration(start_time)
 
-# === ВЪЗПРОИЗВЕЖДАНЕ В БЕЗКРАЕН ЦИКЪЛ ===
+# === INFINITY LOOP ===
 print("▶️ Стартиране на безкрайно слайдшоу...")
 
 while True:
     full_slideshow.preview(fps=30)
+
